@@ -1,0 +1,15 @@
+# Compiled / build artifacts
+*.zip
+node_modules/
+dist/
+build/
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
