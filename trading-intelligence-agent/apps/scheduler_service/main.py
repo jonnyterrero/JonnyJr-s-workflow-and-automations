@@ -1,74 +1,29 @@
-"""Scheduler service — runs daily and intraday data collection jobs."""
+"""Scheduler service — runs the shared full daily ingestion job on a cron."""
 from __future__ import annotations
 
 import asyncio
 import os
 
-from dotenv import load_dotenv
 import structlog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from dotenv import load_dotenv
 
-from packages.data_providers.factory import (
-    get_crypto_provider,
-    get_macro_provider,
-    get_market_provider,
-    get_news_providers,
-    get_social_providers,
-)
+from packages.jobs.daily_ingestion import run_daily_ingestion_job
 from packages.observability.logging import configure_logging
-from packages.storage.database import create_tables, AsyncSessionLocal
-from packages.market_data.collector import MarketDataCollector
-from packages.macro_data.collector import MacroDataCollector
-from packages.crypto_exchanges.collector import CryptoDataCollector
-from packages.news_intel.collector import NewsCollector
-from packages.social_intel.collector import SocialCollector
-from packages.storage.repositories import AssetRepository
+from packages.storage.database import AsyncSessionLocal, create_tables
 
 load_dotenv()
 configure_logging("scheduler")
 logger = structlog.get_logger()
 
 DAILY_CRON = os.getenv("DAILY_JOB_CRON", "0 6 * * *")
-DEFAULT_WATCHLIST = os.getenv(
-    "DEFAULT_WATCHLIST", "SPY,QQQ,TLT,AAPL,NVDA,TSLA,BTC-USD,ETH-USD"
-).split(",")
-DEFAULT_CRYPTO_WATCHLIST = os.getenv(
-    "DEFAULT_CRYPTO_WATCHLIST", "BTC-USD,ETH-USD,SOL-USD"
-).split(",")
 
 
 async def run_daily_collection() -> None:
     logger.info("daily_job_start")
-    async with AsyncSessionLocal() as db:
-        asset_repo = AssetRepository(db)
-        watchlist = await asset_repo.get_watchlist()
-        symbols = [a.symbol for a in watchlist] or DEFAULT_WATCHLIST
-
-    equity = [s for s in symbols if "-USD" not in s]
-    crypto = [s for s in symbols if "-USD" in s] or DEFAULT_CRYPTO_WATCHLIST
-
-    if equity:
-        collector = MarketDataCollector(get_market_provider(), AsyncSessionLocal)
-        result = await collector.run_daily_collection(equity)
-        logger.info("market_collection_done", summary=list(result.keys()))
-
-    macro_c = MacroDataCollector(get_macro_provider(), AsyncSessionLocal)
-    await macro_c.collect_all_indicators()
-    await macro_c.collect_yield_curve()
-
-    if crypto:
-        crypto_c = CryptoDataCollector(get_crypto_provider(), AsyncSessionLocal)
-        await crypto_c.run_daily_collection(crypto)
-
-    news_c = NewsCollector(get_news_providers(), AsyncSessionLocal)
-    await news_c.collect_for_watchlist(symbols)
-    await news_c.collect_crypto_headlines(hours_back=48)
-
-    social_c = SocialCollector(get_social_providers(), AsyncSessionLocal)
-    await social_c.collect_for_watchlist(symbols)
-
-    logger.info("daily_job_complete")
+    result = await run_daily_ingestion_job(AsyncSessionLocal)
+    logger.info("daily_job_complete", duration_ms=result.get("duration_ms"))
 
 
 async def main() -> None:

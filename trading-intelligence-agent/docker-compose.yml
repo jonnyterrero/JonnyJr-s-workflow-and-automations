@@ -61,6 +61,16 @@ services:
       postgres:
         condition: service_healthy
 
+  collector:
+    <<: *common
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.collector
+    command: python -m apps.collector_service.main
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_data:
 

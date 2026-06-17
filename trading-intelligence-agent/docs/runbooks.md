@@ -109,4 +109,8 @@ docker-compose down -v
 
 **Broader market context**: `POST /admin/jobs/run-daily` now stores both symbol-targeted news and a general-market sweep. That general pass is what picks up broad RSS headlines, Finnhub general news, NewsAPI broad queries, and IPO Scoop calendar items.
 
+**Live bootstrap**: Use `python -m scripts.bootstrap_live_data` to initialize a clean live-ready database without synthetic news, social posts, or demo price history. Add `--reset-watchlist` only when you explicitly want to replace existing watchlist rows.
+
+**Public admin access**: When `ADMIN_API_TOKEN` is set, send it as `X-Admin-Token: ...` or `Authorization: Bearer ...` for `/admin/*` routes.
+
 **Migration fails**: Run `make reset-db` to drop and recreate the database.

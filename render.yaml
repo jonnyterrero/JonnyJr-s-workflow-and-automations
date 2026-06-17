@@ -1,0 +1,79 @@
+services:
+  - type: web
+    name: trading-intelligence-api
+    runtime: python
+    rootDir: trading-intelligence-agent
+    plan: starter
+    region: oregon
+    buildCommand: pip install -e .
+    startCommand: python -m uvicorn apps.api_service.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - fromGroup: trading-intel-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: trading-intel-db
+          property: connectionString
+
+  - type: cron
+    name: trading-intelligence-daily
+    runtime: python
+    rootDir: trading-intelligence-agent
+    plan: starter
+    region: oregon
+    schedule: "0 10 * * *"
+    buildCommand: pip install -e .
+    startCommand: python -m scripts.run_daily_job
+    envVars:
+      - fromGroup: trading-intel-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: trading-intel-db
+          property: connectionString
+
+envVarGroups:
+  - name: trading-intel-shared
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4
+      - key: DEMO_MODE
+        value: false
+      - key: COINBASE_USE_PUBLIC_MARKET_DATA
+        value: true
+      - key: ENABLE_IPOSCOOP_SCRAPER
+        value: true
+      - key: DEFAULT_WATCHLIST
+        value: SPY,QQQ,TLT,AAPL,NVDA,TSLA,BTC-USD,ETH-USD
+      - key: DEFAULT_CRYPTO_WATCHLIST
+        value: BTC-USD,ETH-USD,SOL-USD
+      - key: ADMIN_API_TOKEN
+        generateValue: true
+      - key: EDGAR_USER_AGENT
+        sync: false
+      - key: POLYGON_API_KEY
+        sync: false
+      - key: ALPHA_VANTAGE_API_KEY
+        sync: false
+      - key: FINNHUB_API_KEY
+        sync: false
+      - key: SEC_API_KEY
+        sync: false
+      - key: FRED_API_KEY
+        sync: false
+      - key: NEWSAPI_KEY
+        sync: false
+      - key: X_BEARER_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LLM_PROVIDER
+        value: openai
+
+databases:
+  - name: trading-intel-db
+    databaseName: trading_intel
+    user: trading_intel
+    plan: basic-256mb
+    region: oregon

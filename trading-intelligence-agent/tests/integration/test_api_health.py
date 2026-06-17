@@ -10,7 +10,7 @@ from httpx import ASGITransport, AsyncClient
 
 TEST_DB_PATH = Path(__file__).resolve().parents[2] / "data" / "test_trading_intel.db"
 os.environ["DEMO_MODE"] = "true"
-os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{TEST_DB_PATH.as_posix()}"
+os.environ.setdefault("DATABASE_URL", f"sqlite+aiosqlite:///{TEST_DB_PATH.as_posix()}")
 
 from apps.api_service.main import app  # noqa: E402
 from packages.storage.database import create_tables  # noqa: E402

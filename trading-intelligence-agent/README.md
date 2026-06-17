@@ -9,6 +9,7 @@ Production-minded cross-asset decision-support backend for ETFs, equities, bonds
 - pure portfolio policy and risk evaluation engine
 - FastAPI routes for assets, signals, research, and portfolio evaluation
 - local Docker/PostgreSQL path plus SQLite demo path
+- deployment blueprint for Render plus live bootstrap tooling
 
 ## Stack
 
@@ -31,20 +32,37 @@ Production-minded cross-asset decision-support backend for ETFs, equities, bonds
 
 ## Quick Start
 
+### Live Mode
+
 ```bash
 cd trading-intelligence-agent
 cp .env.example .env
 python -m pip install -e ".[dev]"
-python -m scripts.seed_demo_data
+python -m scripts.bootstrap_live_data
 python -m uvicorn apps.api_service.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Open `http://localhost:8000/docs`.
 
+Run the full ingestion cycle:
+
+```bash
+python -m scripts.run_daily_job
+```
+
+### Demo Mode
+
+```bash
+python -m scripts.seed_demo_data
+python -m uvicorn apps.api_service.main:app --reload --host 0.0.0.0 --port 8000
+```
+
 ## Core Commands
 
 ```bash
 make setup
+make bootstrap-live
+make run-daily-job
 make run-demo
 make test
 make docker-up
@@ -72,17 +90,23 @@ make docker-up
 - Docker compose path: PostgreSQL 16 with `asyncpg`
 - Alembic migration added: `002_portfolio_policy_foundation.py`
 
+## Deployment
+
+- Local Docker and cloud steps: [docs/deployment.md](./docs/deployment.md)
+- Render blueprint: repo-root `render.yaml`
+- Public deployments should set `ADMIN_API_TOKEN` and send it on `/admin/*` calls
+
 ## Current Scope Limits
 
 - No broker execution
 - No autonomous trading
 - No dashboard frontend yet
-- Data adapters remain demo/seed-first unless real provider credentials are added
+- Data adapters remain key-driven unless real provider credentials are added
 - Backtesting tables exist, but full walk-forward evaluation is not yet the primary path
 
 ## Suggested Next Build Steps
 
 1. Resolve X API auth and verify social ingestion live.
-2. Add more website-specific scrapers only where no stable API/RSS path exists and robots/ToS permit it.
-3. Add decision-output persistence and human review endpoints.
-4. Build a dashboard client against the FastAPI routes.
+2. Add decision-output persistence and human review endpoints.
+3. Build a dashboard client against the FastAPI routes.
+4. Improve provider-specific retries, quotas, and admin observability.

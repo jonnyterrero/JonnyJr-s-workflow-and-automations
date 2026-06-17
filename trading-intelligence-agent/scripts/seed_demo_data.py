@@ -222,10 +222,10 @@ async def seed() -> None:
         profile_row = await profile_repo.upsert(DEFAULT_PROFILE)
         await profile_repo.set_positions(profile_row.id, DEFAULT_PORTFOLIO_POSITIONS)
         await policy_repo.replace_rules(profile_row.id, DEFAULT_POLICY_RULES)
-        print(f"  - profile {profile_row.name}")
+    print(f"  - profile {profile_row.name}")
 
     print("\nTrading intelligence demo seed complete.")
-    print("Run `uvicorn apps.api_service.main:app --reload --host 0.0.0.0 --port 8000` to start the API.")
+    print("Run `python -m uvicorn apps.api_service.main:app --reload --host 0.0.0.0 --port 8000` to start the API.")
 
 
 if __name__ == "__main__":

@@ -6,10 +6,10 @@ import os
 
 import structlog
 
-from packages.observability.logging import configure_logging
-from packages.storage.database import create_tables, AsyncSessionLocal
-from packages.data_providers.demo.crypto import DemoCryptoProvider
 from packages.crypto_exchanges.collector import CryptoDataCollector
+from packages.data_providers.factory import get_crypto_provider
+from packages.observability.logging import configure_logging
+from packages.storage.database import AsyncSessionLocal, create_tables
 
 configure_logging("collector")
 logger = structlog.get_logger()
@@ -20,7 +20,7 @@ CRYPTO_SYMBOLS = [s for s in CRYPTO_SYMBOLS if "-USD" in s]
 
 
 async def run_intraday_loop() -> None:
-    collector = CryptoDataCollector(DemoCryptoProvider(), AsyncSessionLocal)
+    collector = CryptoDataCollector(get_crypto_provider(), AsyncSessionLocal)
     while True:
         try:
             logger.info("intraday_collection_tick", symbols=CRYPTO_SYMBOLS)
