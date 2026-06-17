@@ -64,7 +64,7 @@ envVarGroups:
       - key: DEFAULT_CRYPTO_WATCHLIST
         value: BTC-USD,ETH-USD,SOL-USD
       - key: ADMIN_API_TOKEN
-        generateValue: true
+        sync: false
       - key: EDGAR_USER_AGENT
         sync: false
       - key: POLYGON_API_KEY

@@ -42,6 +42,7 @@ The repo root contains `render.yaml` for a minimal cloud deployment:
 2. In Render, create a new Blueprint from the repository root.
 3. Review `render.yaml`.
 4. Fill the unsynced secrets:
+   - `ADMIN_API_TOKEN`
    - `EDGAR_USER_AGENT`
    - `POLYGON_API_KEY`
    - `ALPHA_VANTAGE_API_KEY`
@@ -61,7 +62,7 @@ python -m scripts.run_daily_research
 
 ### Notes
 
-- `ADMIN_API_TOKEN` is generated automatically in `render.yaml`. Use it as `X-Admin-Token` or `Authorization: Bearer ...` for `/admin/*` routes.
+- Set `ADMIN_API_TOKEN` to a value you control. Use it as `X-Admin-Token` or `Authorization: Bearer ...` for `/admin/*` routes.
 - `initialDeployHook` on the API service runs `python -m scripts.bootstrap_live_data` once on first successful deploy.
 - The cron schedule in `render.yaml` is UTC.
 - The public API is usable without a frontend. Start with `/docs`.
