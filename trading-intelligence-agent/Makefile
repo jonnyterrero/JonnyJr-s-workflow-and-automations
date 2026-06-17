@@ -1,6 +1,6 @@
-.PHONY: setup install-dev seed bootstrap-live run-daily-job test lint format run-api run-worker \
+.PHONY: setup install-dev seed bootstrap-live run-daily-job run-daily-research test lint format run-api run-worker \
         run-scheduler run-collector run-demo docker-build docker-up docker-down \
-        docker-logs docker-bootstrap-live docker-run-daily-job clean health
+        docker-logs docker-bootstrap-live docker-run-daily-job docker-run-daily-research clean health
 
 PROJECT_DIR := $(shell pwd)
 PYTHON      := python
@@ -23,6 +23,9 @@ bootstrap-live:
 
 run-daily-job:
 	$(PYTHON) -m scripts.run_daily_job
+
+run-daily-research:
+	$(PYTHON) -m scripts.run_daily_research
 
 run-api:
 	$(PYTHON) -m uvicorn apps.api_service.main:app --reload --host 0.0.0.0 --port 8000
@@ -77,6 +80,9 @@ docker-bootstrap-live:
 
 docker-run-daily-job:
 	docker-compose run --rm api python -m scripts.run_daily_job
+
+docker-run-daily-research:
+	docker-compose run --rm api python -m scripts.run_daily_research
 
 health:
 	@curl -s http://localhost:8000/health | python -m json.tool || echo "API not running"

@@ -33,6 +33,7 @@ The repo root contains `render.yaml` for a minimal cloud deployment:
 
 - `trading-intelligence-api`: public FastAPI service
 - `trading-intelligence-daily`: daily cron that runs the full ingestion job
+- `trading-intelligence-research`: daily cron that generates watchlist signals and the briefing
 - `trading-intel-db`: managed Postgres
 
 ### Steps
@@ -51,16 +52,17 @@ The repo root contains `render.yaml` for a minimal cloud deployment:
    - `X_BEARER_TOKEN`
    - `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
 5. Deploy the Blueprint.
-6. Open a Render shell for the API service and run:
+6. Optional: if you want data immediately instead of waiting for the next cron window, open a Render shell for the API service and run:
 
 ```bash
-python -m scripts.bootstrap_live_data
 python -m scripts.run_daily_job
+python -m scripts.run_daily_research
 ```
 
 ### Notes
 
 - `ADMIN_API_TOKEN` is generated automatically in `render.yaml`. Use it as `X-Admin-Token` or `Authorization: Bearer ...` for `/admin/*` routes.
+- `initialDeployHook` on the API service runs `python -m scripts.bootstrap_live_data` once on first successful deploy.
 - The cron schedule in `render.yaml` is UTC.
 - The public API is usable without a frontend. Start with `/docs`.
 
@@ -71,10 +73,10 @@ After deployment, use this sequence:
 1. `GET /health`
 2. `GET /admin/providers`
 3. `POST /admin/jobs/run-daily`
-4. `GET /admin/corporate/NVDA`
-5. `GET /admin/ipo-calendar`
-6. `POST /signals/run`
-7. `POST /research/daily-briefing`
+4. `POST /admin/jobs/run-research`
+5. `GET /admin/corporate/NVDA`
+6. `GET /admin/ipo-calendar`
+7. `GET /research/daily-briefing/latest`
 
 Example signal request:
 

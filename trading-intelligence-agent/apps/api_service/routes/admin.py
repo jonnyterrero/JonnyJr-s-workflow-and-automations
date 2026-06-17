@@ -15,6 +15,7 @@ from packages.data_providers.live.crypto_feeds_catalog import catalog_summary
 from packages.data_providers.live.iposcoop_calendar import IPOScoopCalendarProvider
 from packages.data_providers.live.x_setup import get_x_config, verify_x_bearer
 from packages.jobs.daily_ingestion import run_daily_ingestion_job
+from packages.jobs.daily_research import run_daily_research_job
 from packages.security.admin import require_admin_api_token
 from packages.storage.database import AsyncSessionLocal, get_db
 from packages.storage.repositories import FilingRepository, ModelFeatureRepository
@@ -120,10 +121,15 @@ async def run_ingestion() -> dict:
     return await run_daily_job()
 
 
+@router.post("/jobs/run-research")
+async def run_research_job() -> dict:
+    return await run_daily_research_job(AsyncSessionLocal)
+
+
 @router.get("/jobs/status")
 async def get_job_status() -> dict:
     return {
         "status": "no background job running",
         "providers": provider_status(),
-        "note": "Use POST /admin/jobs/run-daily to trigger",
+        "note": "Use POST /admin/jobs/run-daily or POST /admin/jobs/run-research to trigger",
     }

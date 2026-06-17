@@ -48,6 +48,7 @@ Run the full ingestion cycle:
 
 ```bash
 python -m scripts.run_daily_job
+python -m scripts.run_daily_research
 ```
 
 ### Demo Mode
@@ -63,6 +64,7 @@ python -m uvicorn apps.api_service.main:app --reload --host 0.0.0.0 --port 8000
 make setup
 make bootstrap-live
 make run-daily-job
+make run-daily-research
 make run-demo
 make test
 make docker-up
@@ -77,6 +79,7 @@ make docker-up
 - `GET /admin/corporate/{symbol}`
 - `GET /admin/ipo-calendar`
 - `POST /admin/jobs/run-daily`
+- `POST /admin/jobs/run-research`
 - `GET /signals`
 - `POST /signals/run`
 - `GET /risk/{symbol}`

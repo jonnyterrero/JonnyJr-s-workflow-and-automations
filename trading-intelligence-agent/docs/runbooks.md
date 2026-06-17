@@ -71,6 +71,17 @@ curl -X POST http://localhost:8000/signals/run \
 curl -X POST http://localhost:8000/research/daily-briefing
 ```
 
+## Running Daily Research Outputs
+
+```bash
+curl -X POST http://localhost:8000/admin/jobs/run-research
+```
+
+This job generates:
+
+- watchlist signals
+- the latest stored daily briefing
+
 ## Resetting the Database
 
 ```bash
